@@ -1,4 +1,4 @@
-define(['test3', 'test4'],function(test2, test3){
+define(['test3', 'test4'],function(test3, test4){
     return {
         init: function(){
             test3.init();
