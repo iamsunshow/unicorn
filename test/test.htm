@@ -6,8 +6,9 @@
     <body>
         <script src="../src/unicorn.js"></script>
         <script>
-        require(['test1'],function(test1){
+        require(['test1', 'test2'],function(test1, test2){
             test1.init();
+            test2.init();
             alert('test.html');
         });
         </script>

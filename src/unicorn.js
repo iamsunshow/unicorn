@@ -1,70 +1,49 @@
 (function(__WIN){
     var __DOC = __WIN.document;
-    var __instances = {};
-    var __lastLoadFile;
+    var __ObjectPrototype = Object.prototype.toString;
+    var __fileQueue = [];
+    var __execQueue = [];
 
-    function __getInstances(keys){
-        var result = [];
-
-        for(var i = 0;i < keys.length;i++){
-            result.push(__instances[keys[i]]);
-        }
-
-        return result;
+    function __isArray(obj){
+        return __ObjectPrototype.call(obj) == '[object Array]';
     };
-    function __copyFilePaths(source, target){
-        for(var i = 0;i < source.length;i++) target[i] = source[i];
+    function __isFunction(obj){
+        return __ObjectPrototype.call(obj) == '[object Function]';
     };
-    function __loadFiles(queue, keys, callback){
-        if(queue.length == 0){
-            callback.apply(__WIN, []);
-        }
-        if(queue.length > 0){
+    function __loadFiles(){
+        if(__fileQueue.length > 0){
             var script = __DOC.createElement('SCRIPT');
 
-            script.src = queue.shift() + '.js';
+            script.src = __fileQueue.shift() + '.js';
             script.onload = function(){
-                keys.push(script.src);
-
-                if(queue.length > 0){
-                    __loadFiles(queue, keys, callback);
+                if(__fileQueue.length > 0){
+                    __loadFiles();
                 }else{
-                    callback.apply(__WIN, __getInstances(keys));
                     return;
                 }
             };
             __DOC.getElementsByTagName('HEAD')[0].appendChild(script);
-
-            __lastLoadFile = script.src;
         }
     };
     function define(id, dependencies, factory){
-        var oc = Object.prototype.toString;
-
-        if(oc.call(id) == '[object Array]'){
+        if(__isArray(id)){
             factory = dependencies;
             dependencies = id;
-            id = __lastLoadFile;
+            id = null;
         }
 
-        var queue = [],
-            keys = []; 
+        if(__isArray(dependencies)) __fileQueue = __fileQueue.concat(dependencies);
 
-        __copyFilePaths(dependencies, queue);
-
-        __loadFiles(queue, keys, function(){
-            __instances[id] = factory.apply(__WIN, arguments);
-        });
+        if(__isFunction(factory)) __execQueue.push(factory);
     };
-    function require(dependencies, factory){
-        var queue = [],
-            keys = []; 
+    function require(dependencies, callback){
+        if(__isArray(dependencies)) __fileQueue = __fileQueue.concat(dependencies);
 
-        __copyFilePaths(dependencies, queue);
+        if(__isFunction(callback)) __execQueue.push(callback);
 
-        __loadFiles(queue, keys, factory);
+        __loadFiles();
     };
 
-    window.define = define;
-    window.require = require;
+    __WIN.define = define;
+    __WIN.require = require;
 })(window);
