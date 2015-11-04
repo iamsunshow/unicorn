@@ -128,5 +128,5 @@
         }
     });
     // TODO: dependencies path validation
-    /*
+    */
 })(window);
