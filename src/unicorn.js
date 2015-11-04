@@ -111,6 +111,19 @@
         __loadFiles();
     };
 
+    define.amd = {};
+    require.amd = {};
+
     __WIN.define = define;
     __WIN.require = require;
+    
+    /*
+    // TODO: not dependent
+    define({
+        add: function(x, y){
+            return x + y;
+        }
+    });
+    // TODO: dependencies path validation
+    /*
 })(window);
