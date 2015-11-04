@@ -1,5 +1,5 @@
 (function(__WIN){
-    var __DOC = __WIN.document;
+    var __doc = __WIN.document;
     var __ObjectPrototype = Object.prototype.toString;
     var __instances = {};
     var __fileQueue = [];
@@ -7,6 +7,9 @@
     var __requireQueue = [];
     var __currentInstanceId;
 
+    function __isString(obj){
+        return __ObjectPrototype.call(obj) == '[object String]';
+    };
     function __isArray(obj){
         return __ObjectPrototype.call(obj) == '[object Array]';
     };
@@ -21,7 +24,7 @@
         for(var i = arr.length - 1;i >= 0;i--) func(arr[i]);
     };
     function __createScriptNode(){
-        return __DOC.createElement('SCRIPT');
+        return __doc.createElement('SCRIPT');
     };
     function __getInstanceId(key){
         var script = __createScriptNode();
@@ -70,12 +73,18 @@
                     return;
                 }
             };
-            __DOC.getElementsByTagName('HEAD')[0].appendChild(script);
+            __doc.getElementsByTagName('HEAD')[0].appendChild(script);
 
             __currentInstanceId = script.src;
         }
     };
     function define(id, deps, callback){
+        var alias;
+        if(__isString(id)){
+            alias = id;
+            id = __currentInstanceId;
+        }
+
         if(__isArray(id)){
             callback = deps;
             deps = id;
@@ -87,7 +96,8 @@
         if(__isFunction(callback)) __defineQueue.push({
             callback: callback,
             dependencies: deps,
-            id: id
+            id: id,
+            alias: alias
         });
     };
     function require(deps, callback){
