@@ -1,5 +1,5 @@
-(function(__WIN){
-    var __doc = __WIN.document;
+(function(__win){
+    var __doc = __win.document;
     var __ObjectPrototype = Object.prototype.toString;
     var __instances = {};
     var __fileQueue = [];
@@ -48,7 +48,7 @@
                 deps = def.dependencies,
                 id = def.id;
 
-            __instances[id] = callback.apply(__WIN, __getInstances(deps));
+            __instances[id] = callback.apply(__win, __getInstances(deps));
         });
     };
     function __execRequires(){
@@ -56,7 +56,7 @@
             var callback = req.callback,
                 deps = req.dependencies;
                 
-            callback.apply(__WIN, __getInstances(deps));
+            callback.apply(__win, __getInstances(deps));
         });
     };
     function __loadFiles(){
@@ -110,12 +110,15 @@
 
         __loadFiles();
     };
+    function config(cfg){};
 
     define.amd = {};
     require.amd = {};
+    config.amd = {};
 
-    __WIN.define = define;
-    __WIN.require = require;
+    __win.define = define;
+    __win.require = require;
+    __win.config = config;
     
     /*
     // TODO: not dependent
