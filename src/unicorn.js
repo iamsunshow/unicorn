@@ -1,20 +1,25 @@
 (function(__win){
+    var __POSTFIX = '.js';
     var __doc = __win.document;
-    var __ObjectPrototype = Object.prototype.toString;
+    var __objectPrototype = Object.prototype.toString;
     var __instances = {};
     var __fileQueue = [];
     var __defineQueue = [];
     var __requireQueue = [];
+    var __baseUrl;
     var __currentInstanceId;
 
+    function __isObject(obj){
+        return __objectPrototype.call(obj) == '[object Object]';
+    };
     function __isString(obj){
-        return __ObjectPrototype.call(obj) == '[object String]';
+        return __objectPrototype.call(obj) == '[object String]';
     };
     function __isArray(obj){
-        return __ObjectPrototype.call(obj) == '[object Array]';
+        return __objectPrototype.call(obj) == '[object Array]';
     };
     function __isFunction(obj){
-        return __ObjectPrototype.call(obj) == '[object Function]';
+        return __objectPrototype.call(obj) == '[object Function]';
     };
     function __each(arr, func){
         var len = arr.length;
@@ -29,7 +34,7 @@
     function __getInstanceId(key){
         var script = __createScriptNode();
 
-        script.src = key + '.js';
+        script.src = key + __POSTFIX;
 
         return script.src;
     };
@@ -60,12 +65,15 @@
         });
     };
     function __loadFiles(){
+        // TODO: not process __fileQueue is []
         if(__fileQueue.length > 0){
             var script = __createScriptNode();
 
-            script.src = __fileQueue.shift() + '.js';
+            script.src = __fileQueue.shift() + __POSTFIX;
             script.onload = function(){
                 if(__fileQueue.length > 0){
+                    // onload is execute after append script tag to body tag.
+                    // define of dependencies is execute after append script tag to body tag, so new file added to __fileQueue.
                     __loadFiles();
                 }else{
                     __execDefines();
@@ -110,18 +118,30 @@
 
         __loadFiles();
     };
-    function config(cfg){};
+    function config(cfg){
+        if(cfg){
+            if(cfg.baseUrl) __baseUrl = cfg.baseUrl;
+            if(cfg.paths) {
+                var paths = cfg.paths;
+
+                if(__isObject(paths)){
+                    // TODO: merge to __each
+                    for(var path in paths) __fileQueue.push(paths[path]);
+                }
+            }
+        }
+    };
 
     define.amd = {};
     require.amd = {};
-    config.amd = {};
+
+    require.config = config;
 
     __win.define = define;
     __win.require = require;
-    __win.config = config;
     
     /*
-    // TODO: not dependent
+    // TODO: not dependent case
     define({
         add: function(x, y){
             return x + y;

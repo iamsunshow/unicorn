@@ -3,7 +3,7 @@ define(['test5', 'test6'],function(test5, test6){
         init: function(){
             test5.init();
             test6.init();
-            alert('test2');
+            console.log('test2');
         }
     };
 });

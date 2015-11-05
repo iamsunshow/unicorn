@@ -1,7 +1,7 @@
 define([],function(){
     return {
         init: function(){
-            alert('test6');
+            console.log('test6');
         }
     };
 });

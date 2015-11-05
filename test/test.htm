@@ -6,10 +6,19 @@
     <body>
         <script src="../src/unicorn.js"></script>
         <script>
+        require.config({
+            baseUrl: '../js/',
+            paths: {
+                zepto: 'http://127.0.0.1/enjoytravels/js/lib/zepto.min',
+                magic: 'http://127.0.0.1/enjoytravels/js/lib/magic.min'
+            }
+        });
+        </script>
+        <script>
         require(['test1', 'test2'],function(test1, test2){
             test1.init();
             test2.init();
-            alert('test.html');
+            console.log('test.html');
         });
         </script>
     </body>
