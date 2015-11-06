@@ -2,12 +2,12 @@
     var __POSTFIX = '.js';
     var __doc = __win.document;
     var __objectPrototype = Object.prototype.toString;
-    var __instances = {};
+    var __baseUrl;
+    var __instanceMap = {};
+    var __aliasMap = {};
     var __fileQueue = [];
     var __defineQueue = [];
     var __requireQueue = [];
-    var __baseUrl;
-    var __currentInstanceId;
 
     function __isObject(obj){
         return __objectPrototype.call(obj) == '[object Object]';
@@ -86,34 +86,56 @@
             __currentInstanceId = script.src;
         }
     };
+    function __getAbsolutePath(path){
+    
+    };
     function define(id, deps, callback){
-        var alias;
-        if(__isString(id)){
-            alias = id;
-            id = __currentInstanceId;
+        var absolutePathsOfDeps = [];
+
+        if(__isString(id) && __isArray(deps) && __isFunction(callback)){
+            __aliasMap[id] = absolutePath;
+
+            __instanceMap[absolutePath] = null;
+
+            id = absolutePath;
         }
 
-        if(__isArray(id)){
+        if(__isArray(id) && __isFunction(deps)){
+            __instanceMap[absolutePath] = null;
+
             callback = deps;
             deps = id;
-            id = __currentInstanceId;
+            id = absolutePath;
         }
 
-        if(__isArray(deps)) __fileQueue = __fileQueue.concat(deps);
+        if(__isArray(deps)) {
+            __each(deps, function(path){
+                absolutePathsOfDeps.push(__getAbsolutePath(path));
+            });
+
+            __fileQueue.concat(absolutePathsOfDeps);
+        }
 
         if(__isFunction(callback)) __defineQueue.push({
             callback: callback,
-            dependencies: deps,
-            id: id,
-            alias: alias
+            dependencies: absolutePathsOfDeps,
+            id: id
         });
     };
     function require(deps, callback){
-        if(__isArray(deps)) __fileQueue = __fileQueue.concat(deps);
+        var absolutePathsOfDeps = [];
+
+        if(__isArray(deps)) {
+            __each(deps, function(path){
+                absolutePathsOfDeps.push(__getAbsolutePath(path));
+            });
+
+            __fileQueue.concat(absolutePathsOfDeps);
+        }
 
         if(__isFunction(callback)) __requireQueue.push({
             callback: callback,
-            dependencies: deps
+            dependencies: absolutePathsOfDeps
         });
 
         __loadFiles();
@@ -121,12 +143,21 @@
     function config(cfg){
         if(cfg){
             if(cfg.baseUrl) __baseUrl = cfg.baseUrl;
+
             if(cfg.paths) {
                 var paths = cfg.paths;
 
                 if(__isObject(paths)){
                     // TODO: merge to __each
-                    for(var path in paths) __fileQueue.push(paths[path]);
+                    for(var path in paths) {
+                        var absolutePath = __getAbsolutePath(paths[path]);
+
+                        __fileQueue.push(absolutePath);
+
+                        __aliasMap[path] = absolutePath;
+
+                        __instanceMap[absolutePath] = null;
+                    }
                 }
             }
         }
