@@ -2,7 +2,7 @@
     var __POSTFIX = '.js';
     var __doc = __win.document;
     var __objectPrototype = Object.prototype.toString;
-    var __baseUrl;
+    var __currentAbsolutePathOfDefine;
     var __instanceMap = {};
     var __aliasMap = {};
     var __fileQueue = [];
@@ -31,18 +31,11 @@
     function __createScriptNode(){
         return __doc.createElement('SCRIPT');
     };
-    function __getInstanceId(key){
-        var script = __createScriptNode();
-
-        script.src = key + __POSTFIX;
-
-        return script.src;
-    };
     function __getInstances(deps){
         var result = [];
 
-        __each(deps, function(key){
-            result.push(__instances[__getInstanceId(key)]);
+        __each(deps, function(id){
+            result.push(__instanceMap[id]);
         });
 
         return result;
@@ -53,7 +46,7 @@
                 deps = def.dependencies,
                 id = def.id;
 
-            __instances[id] = callback.apply(__win, __getInstances(deps));
+            __instanceMap[id] = callback.apply(__win, __getInstances(deps));
         });
     };
     function __execRequires(){
@@ -67,9 +60,11 @@
     function __loadFiles(){
         // TODO: not process __fileQueue is []
         if(__fileQueue.length > 0){
+            __currentAbsolutePathOfDefine = __fileQueue.shift();
+
             var script = __createScriptNode();
 
-            script.src = __fileQueue.shift() + __POSTFIX;
+            script.src = __currentAbsolutePathOfDefine;
             script.onload = function(){
                 if(__fileQueue.length > 0){
                     // onload is execute after append script tag to body tag.
@@ -82,30 +77,27 @@
                 }
             };
             __doc.getElementsByTagName('HEAD')[0].appendChild(script);
-
-            __currentInstanceId = script.src;
         }
     };
     function __getAbsolutePath(path){
-    
+        var script = __createScriptNode();
+
+        script.src = path + __POSTFIX;
+
+        return script.src;
     };
     function define(id, deps, callback){
         var absolutePathsOfDeps = [];
 
         if(__isString(id) && __isArray(deps) && __isFunction(callback)){
-            __aliasMap[id] = absolutePath;
-
-            __instanceMap[absolutePath] = null;
-
-            id = absolutePath;
+            __aliasMap[id] = __currentAbsolutePathOfDefine;
+            id = __currentAbsolutePathOfDefine;
         }
 
         if(__isArray(id) && __isFunction(deps)){
-            __instanceMap[absolutePath] = null;
-
             callback = deps;
             deps = id;
-            id = absolutePath;
+            id = __currentAbsolutePathOfDefine;
         }
 
         if(__isArray(deps)) {
@@ -113,7 +105,7 @@
                 absolutePathsOfDeps.push(__getAbsolutePath(path));
             });
 
-            __fileQueue.concat(absolutePathsOfDeps);
+            __fileQueue = __fileQueue.concat(absolutePathsOfDeps);
         }
 
         if(__isFunction(callback)) __defineQueue.push({
@@ -130,7 +122,7 @@
                 absolutePathsOfDeps.push(__getAbsolutePath(path));
             });
 
-            __fileQueue.concat(absolutePathsOfDeps);
+            __fileQueue = __fileQueue.concat(absolutePathsOfDeps);
         }
 
         if(__isFunction(callback)) __requireQueue.push({
@@ -140,33 +132,9 @@
 
         __loadFiles();
     };
-    function config(cfg){
-        if(cfg){
-            if(cfg.baseUrl) __baseUrl = cfg.baseUrl;
-
-            if(cfg.paths) {
-                var paths = cfg.paths;
-
-                if(__isObject(paths)){
-                    // TODO: merge to __each
-                    for(var path in paths) {
-                        var absolutePath = __getAbsolutePath(paths[path]);
-
-                        __fileQueue.push(absolutePath);
-
-                        __aliasMap[path] = absolutePath;
-
-                        __instanceMap[absolutePath] = null;
-                    }
-                }
-            }
-        }
-    };
 
     define.amd = {};
     require.amd = {};
-
-    require.config = config;
 
     __win.define = define;
     __win.require = require;
