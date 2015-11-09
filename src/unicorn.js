@@ -138,14 +138,4 @@
 
     __win.define = define;
     __win.require = require;
-    
-    /*
-    // TODO: not dependent case
-    define({
-        add: function(x, y){
-            return x + y;
-        }
-    });
-    // TODO: dependencies path validation
-    */
 })(window);
