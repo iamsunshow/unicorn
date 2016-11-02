@@ -1,0 +1,11 @@
+define('a',['b','c'],function(b,c){
+    console.log('demo1');
+});
+define(['b','c'],function(b,c){
+    console.log('demo2');
+});
+define({
+    a:1,
+    b:2,
+    c:3
+});
