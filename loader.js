@@ -72,7 +72,7 @@
             id = getScriptName();
         }
 
-        // push self to uninstanceQueue
+        // push self to uninstance_queue
         UNINSTANCE_QUEUE.push({
             key: id,
             dependencies: dependencies.slice(),
